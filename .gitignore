@@ -1,0 +1,4 @@
+/.idea
+/sources/__pycache__
+/sources/format_checker/__pycache__
+/sources/scorer/__pycache__
