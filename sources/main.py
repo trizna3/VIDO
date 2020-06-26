@@ -1,6 +1,12 @@
+import sys
+import os.path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 from sources.ngram import *
 from sources.preprocessor import *
+from sacred import Experiment
 
+ex = Experiment('vido_experiment', ingredients=[vido_ingredient])
 NAME_NGRAM = "ngram"
 
 # get data
@@ -8,17 +14,14 @@ train_fpath = get_train_path()
 test_fpath = get_test_path()
 
 # initialize model
-preprocessor = Preprocessor(
-    remove_stop_words=False,
-    lowercase=True,
-    lemmatize=True,
-    stem=False
-)
-model = Ngram(NAME_NGRAM, preprocessor)
 
-# training
-model.train(train_fpath)
+@ex.automain
+def main():
+    preprocessor = Preprocessor()
+    model = Ngram(NAME_NGRAM, preprocessor)
+    # training
+    model.train(train_fpath)
 
-# evaluation
-precision = model.test(test_fpath)
-print("precision = {}".format(precision))
+    # evaluation
+    precision = model.test(test_fpath)
+    return "Precision = {}".format(precision)
