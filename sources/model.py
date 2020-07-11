@@ -1,4 +1,4 @@
-from utils import *
+from sources.utils import *
 from sources.scorer.main import evaluate
 from sources.format_checker.main import check_format
 
