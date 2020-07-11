@@ -1,8 +1,10 @@
 import nltk
 from nltk.corpus import stopwords
+from sacred import Ingredient
 
 from sources.utils import *
 
+vido_ingredient = Ingredient('vido')
 
 def load_wordnet():
     nltk.download("wordnet")
@@ -11,23 +13,32 @@ def load_wordnet():
 def load_stopwords():
     nltk.download("stopwords")
 
+@vido_ingredient.config
+def cfg():
+    remove_stop_words = False
+    lowercase = False
+    lemmatize = False
+    stem = False
+
+@vido_ingredient.named_config
+def full_preprocessing():
+    remove_stop_words = True
+    lowercase = True
+    lemmatize = True
+    stem = True
 
 class Preprocessor:
     """
     Data preprocessor.
     """
 
-    def __init__(self, remove_stop_words=False, lowercase=False, lemmatize=False, stem=False):
-        self.remove_stop_words = remove_stop_words
-        self.lowercase = lowercase
-        self.lemmatize = lemmatize
-        self.stem = stem
-
+    def __init__(self):
         load_wordnet()
         load_stopwords()
         pd.set_option('mode.chained_assignment', None)
 
-    def preprocess(self, dataframe):
+    @vido_ingredient.capture
+    def preprocess(self, dataframe, remove_stop_words, lowercase, lemmatize, stem):
         stp_words = stopwords.words("english")
         lemmatizer = nltk.WordNetLemmatizer()
         stemmer = nltk.stem.PorterStemmer()
@@ -37,13 +48,13 @@ class Preprocessor:
             new_text = ""
             first_word = True
             for word in text.strip().split(" "):
-                if self.remove_stop_words and word in stp_words:
+                if remove_stop_words and word in stp_words:
                     continue
-                if self.lowercase:
+                if lowercase:
                     word = word.lower()
-                if self.lemmatize:
+                if lemmatize:
                     word = lemmatizer.lemmatize(word)
-                if self.stem:
+                if stem:
                     word = stemmer.stem(word)
 
                 if not first_word:
