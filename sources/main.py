@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from sources.ngram import *
 from sources.preprocessor import *
 from sacred import Experiment
+from sources.fasttext import *
 
 ex = Experiment('vido_experiment', ingredients=[vido_ingredient])
 NAME_NGRAM = "ngram"
@@ -15,13 +16,22 @@ test_fpath = get_test_path()
 
 # initialize model
 
+TYPE = "FASTTEXT" # "FASTTEXT"
+
+
 @ex.automain
 def main():
     preprocessor = Preprocessor()
-    model = Ngram(NAME_NGRAM, preprocessor)
-    # training
-    model.train(train_fpath)
 
-    # evaluation
+    if TYPE == "NGRAM":    
+        model = Ngram(NAME_NGRAM, preprocessor)
+    # training
+    else:
+        model = FastText(NAME_NGRAM, preprocessor)
+    # tr
+
+    model.train(train_fpath)
     precision = model.test(test_fpath)
     return "Precision = {}".format(precision)
+
+
