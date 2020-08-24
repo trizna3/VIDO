@@ -1,7 +1,8 @@
 import os
 import subprocess
-from sources.model import Model
+from sources.model import *
 from sources.utils import *
+
 
 class FastText(Model):
 
@@ -13,10 +14,11 @@ class FastText(Model):
     def fit(self, data):
 
         # process = subprocess.Popen(['../fastText/fasttext', 'supervised','-minCount 2', '-wordNgrams 3','-minn 3', '-maxn 8', '-lr 0.7', '-dim 100', '-epoch 25', f'-input ./{self.name}.train', f'-output ./{self.name}.model',], 
-                        #    stdout=subprocess.PIPE,
-                        #    universal_newlines=True)
+        #    stdout=subprocess.PIPE,
+        #    universal_newlines=True)
 
-        stream = os.popen(f'../fastText/fasttext supervised -minCount 2 -wordNgrams 3 -minn 3 -maxn 8 -lr 0.7 -dim 100 -epoch 25 f-input ./{self.name}.train f-output ./{self.name}.model')
+        stream = os.popen(
+            f'../fastText/fasttext supervised -minCount 2 -wordNgrams 3 -minn 3 -maxn 8 -lr 0.7 -dim 100 -epoch 25 f-input ./{self.name}.train f-output ./{self.name}.model')
 
         output = stream.read()
         print(output)
@@ -32,8 +34,6 @@ class FastText(Model):
         #         for output in process.stdout.readlines():
         #             print(output.strip())
         #         break
-
-        
 
     def run(self, data):
         # process = subprocess.Popen(['../fastText/fasttext', f'test ./{self.name}.model', f'./{self.name}.valid','3'], 
@@ -60,11 +60,12 @@ class FastText(Model):
         train_data = read_datafile(train_data_path)
         train_data = self.preprocessor.preprocess(train_data)
 
-        data = '__label__' + train_data['claim'].astype(str)  + train_data[ 'check_worthiness'].astype(str)  + ' ' +  train_data['tweet_text']
+        data = '__label__' + train_data['claim'].astype(str) + train_data['check_worthiness'].astype(str) + ' ' + \
+               train_data['tweet_text']
 
         with open(f'{self.name}.train', 'w') as f:
             for x in data:
-                print(x, file=f)
+                self.print_sequence(x, f)
 
         self.fit(train_data)
 
@@ -75,14 +76,22 @@ class FastText(Model):
         test_data = read_datafile(test_data_path)
         test_data = self.preprocessor.preprocess(test_data)
 
-        data = '__label__' + test_data['claim'].astype(str)  + test_data[ 'check_worthiness'].astype(str)  + ' ' +  test_data['tweet_text']
+        data = '__label__' + test_data['claim'].astype(str) + test_data['check_worthiness'].astype(str) + ' ' + \
+               test_data['tweet_text']
 
         with open(f'{self.name}.valid', 'w') as f:
             for x in data:
-                print(x, file=f)
-
+                self.print_sequence(x, f)
         self.run(data)
-
 
     def get_result_path(self):
         return DEFAULT_RESULT_PATH.format(self.name)
+
+    def print_sequence(self, seq, f):
+        for char in seq:
+            try:
+                print(char, file=f, end='', )
+            except UnicodeEncodeError:  # skip character
+                # print("skipped character = {}".format(char))
+                pass
+        print('', file=f)
