@@ -16,8 +16,8 @@ def load_stopwords():
 @vido_ingredient.config
 def cfg():
     remove_stop_words = False
-    lowercase = False
-    lemmatize = False
+    lowercase = True
+    lemmatize = True
     stem = False
 
 @vido_ingredient.named_config

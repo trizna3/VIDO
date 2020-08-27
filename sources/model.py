@@ -30,6 +30,7 @@ class Model:
         Feeds the model, writing outputs in the result file. Then measures the score of it's performance.
         """
         test_data = read_datafile(test_data_path)
+        test_data = self.preprocessor.preprocess(test_data)
         self.run(test_data)
         if check_format(self.get_result_path()):
             thresholds, precisions, avg_precision, reciprocal_rank, num_relevant = evaluate(test_data_path,
